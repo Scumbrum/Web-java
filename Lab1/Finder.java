@@ -2,8 +2,10 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Finder {
 
@@ -36,19 +38,18 @@ public class Finder {
             } else {
                 this.data = writeStrings(fileString);
             }
-        } catch (IOException e) {
+        } catch (IOException | ExecutionException e) {
             System.out.println("Bad output");
         }
 
     }
 
-    private Map<String, String> getStringsMap(String key) throws InterruptedException {
+    private Map<String, String> getStringsMap(String key) throws InterruptedException, ExecutionException {
 
         ExecutorService executor = Executors.newFixedThreadPool(100);
         DirectoryThread thread = new DirectoryThread(workDirectory, executor, key);
 
-        thread.start();
-        thread.join();
+        executor.submit(thread).get();
 
         executor.shutdown();
 
