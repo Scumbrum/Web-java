@@ -17,11 +17,28 @@ public class Finder {
         this.outputFile = outputFile;
     }
 
-    public void findStrings(String key) throws InterruptedException, IOException {
+    public void findStrings(String key) throws InterruptedException {
 
-        Map<String, String> fileString = getStringsMap(key);
+        if(workDirectory =="" || outputFile == "") {
+            throw new IllegalArgumentException("Illegal path");
+        }
+        if(key == "" | isNumber(key)) {
+            throw  new IllegalArgumentException("Invalid key");
+        }
 
-        this.data = writeStrings(fileString);
+        try {
+            Map<String, String> fileString = getStringsMap(key);
+            if(fileString == null) {
+                throw new IllegalArgumentException("Non exists directory");
+            }
+            if (fileString.size()==0) {
+                this.data = writeStrings("Can't find key");
+            } else {
+                this.data = writeStrings(fileString);
+            }
+        } catch (IOException e) {
+            System.out.println("Bad output");
+        }
 
     }
 
@@ -59,7 +76,28 @@ public class Finder {
         return data.toString();
     }
 
+    private String writeStrings(String data) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+
+        System.out.println("Writing founded data into " + outputFile);
+
+        try(writer) {
+           writer.write(data);
+        }
+
+        return data;
+    }
+
     public String getData() {
         return data;
+    }
+
+    private boolean isNumber(String line) {
+        try {
+            Integer.parseInt(line);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

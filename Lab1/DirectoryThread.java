@@ -27,6 +27,11 @@ public class DirectoryThread extends Thread {
         File currentFile = new File(this.fileName);
         File[] childrenFiles = currentFile.listFiles();
         ArrayList<Future> futures = new ArrayList<>();
+        if(!currentFile.exists()) {
+            System.out.println("ss");
+            fileContent = null;
+            return;
+        }
 
         for(File child: childrenFiles) {
 

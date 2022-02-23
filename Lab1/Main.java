@@ -11,10 +11,14 @@ public class Main {
         String outputDirectory = scanner.nextLine();
         System.out.println("Enter key word - >");
         String key = scanner.nextLine();
-        Finder finder = new Finder(workDirectory, outputDirectory);
-        finder.findStrings(key);
-        System.out.println("Output:");
-        System.out.println(finder.getData());
+        try {
+            Finder finder = new Finder(workDirectory, outputDirectory);
+            finder.findStrings(key);
+            System.out.println("Output:");
+            System.out.println(finder.getData());
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 }
