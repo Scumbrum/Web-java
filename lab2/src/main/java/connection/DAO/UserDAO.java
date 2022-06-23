@@ -19,6 +19,40 @@ public class UserDAO extends Util<User> {
 
     }
 
+    public UserDAO(Connection connection) {
+        super(connection);
+    }
+
+    private User userFromStatement(ResultSet result) throws SQLException {
+        User user = new User();
+        user.setId(result.getLong(1));
+        user.setName(result.getString(2));
+        user.setSurname(result.getString(3));
+        user.setPatronimic(result.getString(4));
+        user.setPassword(result.getString(5));
+        user.setMail(result.getString(6));
+        user.setRegion(result.getString(7));
+        user.setCity(result.getString(8));
+        user.setEducation(result.getString(9));
+        user.setBlocked(result.getBoolean(10));
+        return user;
+    }
+
+    private void statementFromUser(PreparedStatement statement, User record, Boolean full) throws SQLException {
+        statement.setString(1, record.getName());
+        statement.setString(2, record.getSurname());
+        statement.setString(3, record.getPatronimic());
+        statement.setString(4, record.getPassword());
+        statement.setString(5, record.getMail());
+        statement.setString(6, record.getRegion());
+        statement.setString(7, record.getCity());
+        statement.setString(8, record.getEducation());
+        if(full) {
+            System.out.println(record.isBlocked());
+            statement.setBoolean(9, record.isBlocked());
+        }
+    }
+
     @Override
     public Optional<User> getById(Long id) throws DAOException {
 
@@ -38,19 +72,9 @@ public class UserDAO extends Util<User> {
 
             try (ResultSet result = statement.executeQuery();) {
                 if(result.next()) {
-                    user.setId(result.getLong(1));
-                    user.setName(result.getString(2));
-                    user.setSurname(result.getString(3));
-                    user.setPatronimic(result.getString(4));
-                    user.setPassword(result.getString(5));
-                    user.setMail(result.getString(6));
-                    user.setRegion(result.getString(7));
-                    user.setCity(result.getString(8));
-                    user.setEducation(result.getString(9));
+                    user = userFromStatement(result);
                 }
             }
-
-
         } catch (SQLException throwables) {
             throw new DAOException("Can't to get user", throwables);
         } finally {
@@ -67,7 +91,7 @@ public class UserDAO extends Util<User> {
         WHERE mail = ?
         """;
 
-        User user = null;
+        User user = new User();
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);){
@@ -78,16 +102,7 @@ public class UserDAO extends Util<User> {
 
             try (ResultSet result = statement.executeQuery();) {
                 if(result.next()) {
-                    user = new User();
-                    user.setId(result.getLong(1));
-                    user.setName(result.getString(2));
-                    user.setSurname(result.getString(3));
-                    user.setPatronimic(result.getString(4));
-                    user.setPassword(result.getString(5));
-                    user.setMail(result.getString(6));
-                    user.setRegion(result.getString(7));
-                    user.setCity(result.getString(8));
-                    user.setEducation(result.getString(9));
+                    user = userFromStatement(result);
                 }
             }
         } catch (SQLException throwables) {
@@ -115,16 +130,7 @@ public class UserDAO extends Util<User> {
 
             try(ResultSet result = statement.executeQuery();) {
                 while (result.next()) {
-                    User user = new User();
-                    user.setId(result.getLong(1));
-                    user.setName(result.getString(2));
-                    user.setSurname(result.getString(3));
-                    user.setPatronimic(result.getString(4));
-                    user.setPassword(result.getString(5));
-                    user.setMail(result.getString(6));
-                    user.setRegion(result.getString(7));
-                    user.setCity(result.getString(8));
-                    user.setEducation(result.getString(9));
+                    User user = userFromStatement(result);
                     users.add(user);
                 }
             }
@@ -148,17 +154,9 @@ public class UserDAO extends Util<User> {
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);){
-
-            statement.setString(1, record.getName());
-            statement.setString(2, record.getSurname());
-            statement.setString(3, record.getPatronimic());
-            statement.setString(4, record.getPassword());
-            statement.setString(5, record.getMail());
-            statement.setString(6, record.getRegion());
-            statement.setString(7, record.getCity());
-            statement.setString(8, record.getEducation());
-
             writer.lock();
+
+            statementFromUser(statement, record, false);
 
             statement.executeUpdate();
 
@@ -175,22 +173,15 @@ public class UserDAO extends Util<User> {
     public boolean update(User record) throws DAOException {
 
         String query = """
-        UPDATE user SET `name` = ?, `surname` = ?, `patronimic` = ?, `password` = ?, `mail` = ?, `region` = ?, `city` = ?, `education`= ?
+        UPDATE user SET `name` = ?, `surname` = ?, `patronimic` = ?, `password` = ?, `mail` = ?, `region` = ?, `city` = ?, `education`= ?, `blocked` = ?
         WHERE `id` = ?
         """;
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);){
 
-            statement.setString(1, record.getName());
-            statement.setString(2, record.getSurname());
-            statement.setString(3, record.getPatronimic());
-            statement.setString(4, record.getPassword());
-            statement.setString(5, record.getMail());
-            statement.setString(6, record.getRegion());
-            statement.setString(7, record.getCity());
-            statement.setString(8, record.getEducation());
-            statement.setLong(9, record.getId());
+            statementFromUser(statement, record, true);
+            statement.setLong(10, record.getId());
 
             writer.lock();
 

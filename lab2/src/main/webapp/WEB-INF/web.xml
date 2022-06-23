@@ -12,14 +12,14 @@
     </context-param>
     <error-page>
         <error-code>404</error-code>
-        <location>/404.html</location>
+        <location>/WEB-INF/404.jsp</location>
     </error-page>
     <error-page>
         <error-code>505</error-code>
-        <location>/505.html</location>
+        <location>/WEB-INF/505.jsp</location>
     </error-page>
     <error-page>
         <error-code>401</error-code>
-        <location>/401.html</location>
+        <location>/WEB-INF/401.jsp</location>
     </error-page>
 </web-app>

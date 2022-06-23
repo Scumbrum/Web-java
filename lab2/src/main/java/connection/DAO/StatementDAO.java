@@ -15,6 +15,9 @@ public class StatementDAO extends Util<Statement> {
     public StatementDAO() {
         super();
     }
+    public StatementDAO(Connection connection) {
+        super(connection);
+    }
 
     @Override
     public Optional<Statement> getById(Long id) throws DAOException {
@@ -41,7 +44,7 @@ public class StatementDAO extends Util<Statement> {
                 statementU.setAverage(result.getShort(4));
                 statementU.setStatus(result.getShort(5));
                 statementU.setUser(createUser(result, 6));
-                statementU.setFaculty(createFaculty(result, 15));
+                statementU.setFaculty(createFaculty(result, 16));
             }
 
 
@@ -60,7 +63,7 @@ public class StatementDAO extends Util<Statement> {
         SELECT * FROM statement 
         JOIN user ON user.id = statement.user
         JOIN faculty ON faculty.id = statement.faculty
-        WHERE user = ? AND faculty = ?
+        WHERE user = ? AND faculty = ? and status=1 and blocked=0
         """;
 
         Statement statementU = new Statement();
@@ -74,12 +77,14 @@ public class StatementDAO extends Util<Statement> {
             reader.lock();
 
             try(ResultSet result = statement.executeQuery();) {
-                result.next();
+                if(!result.next()){
+                    return Optional.empty();
+                }
                 statementU.setId(result.getLong(1));
                 statementU.setAverage(result.getShort(4));
                 statementU.setStatus(result.getShort(5));
                 statementU.setUser(createUser(result, 6));
-                statementU.setFaculty(createFaculty(result, 15));
+                statementU.setFaculty(createFaculty(result, 16));
             }
 
         } catch (SQLException throwables) {
@@ -99,27 +104,35 @@ public class StatementDAO extends Util<Statement> {
         JOIN faculty ON faculty.id = statement.faculty
         WHERE user = ?
         """;
+        return getStatementsWithParam(query, user.getId());
+    }
 
+    private List<Statement> getStatements(ResultSet result) throws SQLException {
         List<Statement> statements = new ArrayList<>();
+
+        while (result.next()) {
+            Statement statementU = new Statement();
+            statementU.setId(result.getLong(1));
+            statementU.setAverage(result.getShort(4));
+            statementU.setStatus(result.getShort(5));
+            statementU.setUser(createUser(result, 6));
+            statementU.setFaculty(createFaculty(result, 16));
+            statements.add(statementU);
+        }
+
+        return  statements;
+    }
+
+    private List<Statement> getStatementsWithParam(String query, Long id) throws DAOException {
+        List<Statement> statements;
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);){
 
-            statement.setLong(1, user.getId());
-
             reader.lock();
-
-            try(ResultSet result = statement.executeQuery();) {
-                while (result.next()) {
-                    Statement statementU = new Statement();
-                    statementU.setId(result.getLong(1));
-                    statementU.setAverage(result.getShort(4));
-                    statementU.setStatus(result.getShort(5));
-                    statementU.setUser(createUser(result, 6));
-                    statementU.setFaculty(createFaculty(result, 15));
-                    statements.add(statementU);
-                }
-
+            statement.setLong(1, id);
+            try (ResultSet result = statement.executeQuery()) {
+                statements = getStatements(result);
             }
 
         } catch (SQLException throwables) {
@@ -127,10 +140,8 @@ public class StatementDAO extends Util<Statement> {
         } finally {
             reader.unlock();
         }
-
         return statements;
     }
-
 
     public List<Statement> getByFaculty(Faculty faculty) throws DAOException {
 
@@ -138,37 +149,10 @@ public class StatementDAO extends Util<Statement> {
         SELECT * FROM statement 
         JOIN user ON user.id = statement.user
         JOIN faculty ON faculty.id = statement.faculty
-        WHERE faculty = ?
+        WHERE faculty = ? and status=1 and blocked=0
         """;
 
-        List<Statement> statements = new ArrayList<>();
-
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);){
-
-            statement.setLong(1, faculty.getId());
-
-            reader.lock();
-
-            try(ResultSet result = statement.executeQuery();) {
-                while (result.next()) {
-                    Statement statementU = new Statement();
-                    statementU.setId(result.getLong(1));
-                    statementU.setAverage(result.getShort(4));
-                    statementU.setStatus(result.getShort(5));
-                    statementU.setUser(createUser(result, 6));
-                    statementU.setFaculty(createFaculty(result, 15));
-                    statements.add(statementU);
-                }
-            }
-
-        } catch (SQLException throwables) {
-            throw new DAOException("Can't get statement", throwables);
-        }finally {
-            reader.unlock();
-        }
-
-        return statements;
+        return getStatementsWithParam(query,  faculty.getId());
     }
 
     private Faculty createFaculty(ResultSet result, Integer begin) throws SQLException {
@@ -191,7 +175,8 @@ public class StatementDAO extends Util<Statement> {
                 result.getString(begin++),
                 result.getString(begin++),
                 result.getString(begin++),
-                result.getString(begin)
+                result.getString(begin++),
+                result.getBoolean(begin)
         );
     }
 
@@ -204,7 +189,7 @@ public class StatementDAO extends Util<Statement> {
         JOIN faculty ON discipline.id = statement.faculty
         """;
 
-        List<Statement> statements = new ArrayList<>();
+        List<Statement> statements;
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)){
@@ -212,15 +197,7 @@ public class StatementDAO extends Util<Statement> {
             reader.lock();
 
             try(ResultSet result = statement.executeQuery();) {
-                while (result.next()) {
-                    Statement statementU = new Statement();
-                    statementU.setId(result.getLong(1));
-                    statementU.setAverage(result.getShort(4));
-                    statementU.setStatus(result.getShort(5));
-                    statementU.setUser(createUser(result, 6));
-                    statementU.setFaculty(createFaculty(result, 15));
-                    statements.add(statementU);
-                }
+                statements = getStatements(result);
             }
 
         } catch (SQLException throwables) {
@@ -243,14 +220,7 @@ public class StatementDAO extends Util<Statement> {
         try (Connection connection = getConnection();
             PreparedStatement statement = connection.prepareStatement(query);){
 
-            statement.setLong(1, record.getUser().getId());
-            statement.setLong(2, record.getFaculty().getId());
-            if(record.getAverage() == null) {
-                statement.setNull(3, Types.SMALLINT);
-            } else  {
-                statement.setShort(3, record.getAverage());
-            }
-            statement.setShort(4, record.getStatus());
+            statementNormalizer(statement, record);
 
             writer.lock();
 
@@ -274,15 +244,7 @@ public class StatementDAO extends Util<Statement> {
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);){
-
-            statement.setLong(1, record.getUser().getId());
-            statement.setLong(2, record.getFaculty().getId());
-            if(record.getAverage() == null) {
-                statement.setNull(3, Types.SMALLINT);
-            } else  {
-                statement.setShort(3, record.getAverage());
-            }
-            statement.setShort(4, record.getStatus());
+            statementNormalizer(statement, record);
             statement.setLong(5, record.getId());
 
             writer.lock();
@@ -296,6 +258,17 @@ public class StatementDAO extends Util<Statement> {
         }
 
         return true;
+    }
+
+    private void statementNormalizer(PreparedStatement statement, Statement record) throws SQLException {
+        statement.setLong(1, record.getUser().getId());
+        statement.setLong(2, record.getFaculty().getId());
+        if(record.getAverage() == null) {
+            statement.setNull(3, Types.SMALLINT);
+        } else  {
+            statement.setShort(3, record.getAverage());
+        }
+        statement.setShort(4, record.getStatus());
     }
 
     @Override

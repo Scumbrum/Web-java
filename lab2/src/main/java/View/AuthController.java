@@ -1,6 +1,7 @@
 package View;
 
 import API.AuthService;
+import API.LoggedAuthService;
 import Config.Actions;
 import Config.Pages;
 import Config.Params;
@@ -24,7 +25,6 @@ public class AuthController extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        System.out.println(logger);
         FileHandler fh = null;
         try {
             fh = new FileHandler("D:/logs/logs.log");
@@ -51,7 +51,7 @@ public class AuthController extends HttpServlet {
         String passwordSecond = request.getParameter(Params.PASSWORD_SECOND_FIELD);
         String login = request.getParameter(Params.LOGIN_FIELD);
         Boolean isValid = false;
-        AuthService authService = new AuthService();
+        AuthService authService = new LoggedAuthService();
 
         logger.info("Auth:" + action);
 
@@ -68,7 +68,6 @@ public class AuthController extends HttpServlet {
                     request.getRequestDispatcher(Pages.REG_PAGE).forward(request, response);
                     return;
                 case Actions.DO_REG:
-
                     User user = new User(
                             request.getParameter(Params.NAME_FIELD),
                             request.getParameter(Params.SURNAME_FIELD),
@@ -89,7 +88,7 @@ public class AuthController extends HttpServlet {
                     }
 
                     session.setAttribute(Params.LOGIN_FIELD, login);
-                    request.getRequestDispatcher(Pages.RANK_CONTROLLER).forward(request, response);
+                    response.sendRedirect(Pages.RANK_CONTROLLER);
                     return;
                 case Actions.DO_LOGIN:
                     isValid = authService.tryLoginUser(login, password);
@@ -105,18 +104,21 @@ public class AuthController extends HttpServlet {
                     return;
                 case Actions.DO_LOGOUT:
                     request.getSession().removeAttribute(Params.LOGIN_FIELD);
-                    response.sendRedirect("." + Pages.LOGIN_CONTROLLER);
+                    response.sendRedirect(Pages.LOGIN_CONTROLLER);
                     return;
                 default:
-                    isValid = authService.checkLogin((String) session.getAttribute(Params.LOGIN_FIELD));
-                    if (!isValid) {
-                        response.setStatus(401);
+                    if(session.getAttribute(Params.LOGIN_FIELD) == null) {
                         request.getRequestDispatcher(Pages.LOGIN_PAGE).forward(request, response);
-                        return;
+                    } else  {
+                        response.sendRedirect(Pages.RANK_CONTROLLER);
                     }
-                    request.getRequestDispatcher(Pages.RANK_CONTROLLER).forward(request, response);
             }
-        }catch (APIException e) {
+        } catch (APIException e) {
+            logger.severe(Arrays.toString(e.getStackTrace()));
+            request.setAttribute(Params.ERROR_FIELD, e.getMessage());
+            request.getRequestDispatcher(Pages.LOGIN_PAGE).forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
             logger.severe(Arrays.toString(e.getStackTrace()));
             response.sendError(505);
         }

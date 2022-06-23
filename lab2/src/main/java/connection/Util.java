@@ -1,8 +1,8 @@
 package connection;
 
+
 import connection.DAO.DAOException;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,20 +11,26 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
 
 public abstract class Util<Dimension> {
 
     public ReadWriteLock lock = new ReentrantReadWriteLock();
     public Lock writer = lock.writeLock();
     public Lock reader = lock.readLock();
+    private Connection connection;
+
+    public Util(Connection connection) {
+        this.connection = connection;
+    }
 
     public Util() {
-
+        this.connection = null;
     }
 
     public Connection getConnection() {
+        if(this.connection!=null) {
+        return this.connection;
+        }
         Connection connection = null;
         try {
 

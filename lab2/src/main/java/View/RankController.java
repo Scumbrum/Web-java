@@ -38,14 +38,13 @@ public class RankController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("Auth POST");
         HttpSession session = req.getSession();
-
         String admin = getServletContext().getInitParameter(Params.ADMIN_FIELD);
         logger.info("Rank: " +  session.getAttribute(Params.LOGIN_FIELD));
         if(session.getAttribute(Params.LOGIN_FIELD).equals(admin)) {
-            req.getRequestDispatcher(Pages.ADMIN_CONTROLLER).forward(req, resp);
+            resp.sendRedirect(Pages.ADMIN_CONTROLLER);
             return;
         } else if(session.getAttribute(Params.LOGIN_FIELD) != null) {
-            req.getRequestDispatcher(Pages.USER_CONTROLLER).forward(req, resp);
+            resp.sendRedirect(Pages.USER_CONTROLLER);
             return;
         } else {
             resp.sendRedirect(Pages.LOGIN_CONTROLLER);

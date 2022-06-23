@@ -13,7 +13,7 @@
 <html>
 <head>
     <title>Title</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
 <header>
@@ -21,13 +21,13 @@
         <nav>
             <ul>
                 <li>
-                    <form action=".">
+                    <form action="./user" method="post">
                         <input type="hidden" name="action" value="toFaculties">
                         <button type="submit" class="nav-item">Faculties</button>
                     </form>
                 </li>
                 <li>
-                    <form action=".">
+                    <form action="./user" method="post">
                         <input type="hidden" name="action" value="toStatement">
                         <button type="submit" class="nav-item">My Statements</button>
                     </form>
@@ -35,13 +35,13 @@
             </ul>
             <ul>
                 <li>
-                    <form action=".">
+                    <form action="./user" method="post">
                         <input type="hidden" name="action" value="toAccount">
                         <button type="submit" class="nav-item">My Account</button>
                     </form>
                 </li>
                 <li>
-                    <form action=".">
+                    <form action="." method="post">
                         <input type="hidden" name="action" value="logout">
                         <button type="submit" class="logout">Logout</button>
                     </form>
@@ -53,13 +53,16 @@
 <main>
     <c:if test="${!empty requestScope.faculties}">
         <section class="faculties container">
+            <c:if test="${!empty requestScope.error}">
+                <h2 class="error center">${requestScope.error}</h2>
+            </c:if>
             <h1>
                 Faculty list
             </h1>
-            <form class="sorted-form">
+            <form class="sorted-form" method="post">
                 <label>
                     Sort by:
-                    <select name="action">
+                    <select action="./user" name="action">
                         <option selected value="sortByAll">
                             All places
                         </option >
@@ -68,6 +71,9 @@
                         </option>
                         <option value="sortByName">
                             Name
+                        </option>
+                        <option value="sortByReverseName">
+                            Reverse Name
                         </option>
                     </select>
                 </label>
@@ -88,7 +94,7 @@
                         <p>
                             Budget: <c:out value="${faculty.getBudgetPlace()}"/>
                         </p>
-                        <form>
+                        <form action="./user" method="post">
                             <input type="hidden" value="${faculty.getId()}" name="id">
                             <input type="hidden" name="action" value="toFacultyReg">
                             <button type="submit">Register</button>
@@ -103,7 +109,7 @@
             <h1>
                 Registration on ${requestScope.targetFaculty.getName()}
             </h1>
-            <form class="top-form">
+            <form action="./user" class="top-form" method="post">
                 <input type="hidden" name="id" value="${requestScope.targetFaculty.getId()}">
                 <input type="hidden" name="action" value="addDiscipline">
                 <c:forEach var="discipline" items="${requestScope.disciplines}">
@@ -116,14 +122,14 @@
                 </select>
                 <button type="submit" class="add-btn">Add more</button>
             </form>
-            <form class="faculty-form registration">
+            <form action="./user" class="faculty-form registration" method="post">
                 <input type="hidden" name="id" value="${requestScope.targetFaculty.getId()}">
                 <c:forEach var="discipline" items="${requestScope.disciplines}">
                     <label>${discipline.getName()}: <input name="${discipline.getId()}" type="number"></label>
                 </c:forEach>
                 <div class="button-group">
                     <button type="submit" name="action" value="doFacultyReg">Register</button>
-                    <button type="submit" name="action" value="cancel" class="delete">Cancel</button>
+                    <button type="submit" name="action" value="cancelReg" class="delete">Cancel</button>
                 </div>
             </form>
         </section>
@@ -167,7 +173,7 @@
     <c:if test="${!empty requestScope.user}">
         <section class="account container">
             <h1>Your data</h1>
-            <form class="account-form login-form">
+            <form action="./user"  class="account-form login-form" method="post">
                 <input type="hidden" name="action" value="changeAccountData">
                 <label>Login: <input name="login" value="vlad"></label>
                 <label>Login: <input name="login" value="vlad"></label>

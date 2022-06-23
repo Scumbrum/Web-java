@@ -16,6 +16,9 @@ public class DisciplineDAO extends Util<Discipline> {
     public DisciplineDAO() {
         super();
     }
+    public DisciplineDAO(Connection connection) {
+        super(connection);
+    }
 
     @Override
     public Optional<Discipline> getById(Long id) throws DAOException {
@@ -89,8 +92,7 @@ public class DisciplineDAO extends Util<Discipline> {
         """;
 
         try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet result = statement.executeQuery();){
+             PreparedStatement statement = connection.prepareStatement(query);){
 
             statement.setString(1, record.getName());
 
@@ -115,10 +117,10 @@ public class DisciplineDAO extends Util<Discipline> {
         """;
 
         try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet result = statement.executeQuery();){
+             PreparedStatement statement = connection.prepareStatement(query);){
 
             statement.setString(1, record.getName());
+            statement.setLong(2, record.getId());
 
             writer.lock();
 

@@ -10,7 +10,7 @@
 <html>
 <head>
     <title>Title</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
 <header>
@@ -18,27 +18,33 @@
         <nav>
             <ul>
                 <li>
-                    <form action=".">
+                    <form action="./admin" method="post">
                         <input type="hidden" name="action" value="toFaculties">
                         <button type="submit" class="nav-item">Faculties</button>
                     </form>
                 </li>
                 <li>
-                    <form action=".">
+                    <form action="./admin" method="POST">
                         <input type="hidden" name="action" value="toStatement">
                         <button type="submit" class="nav-item">Statements</button>
+                    </form>
+                </li>
+                <li>
+                    <form action="./admin" method="post">
+                        <input type="hidden" name="action" value="toUsers">
+                        <button type="submit" class="nav-item">Users</button>
                     </form>
                 </li>
             </ul>
             <ul>
                 <li>
-                    <form action=".">
+                    <form action="./admin" method="POST">
                         <input type="hidden" name="action" value="toAccount">
                         <button type="submit" class="nav-item admin">Admin</button>
                     </form>
                 </li>
                 <li>
-                    <form action=".">
+                    <form action="./" method="post">
                         <input type="hidden" name="action" value="logout">
                         <button type="submit" class="logout">Logout</button>
                     </form>
@@ -48,12 +54,15 @@
     </div>
 </header>
 <main>
+    <c:if test="${!empty requestScope.error}">
+        <h2 class="error center">${requestScope.error}</h2>
+    </c:if>
     <c:if test="${!empty requestScope.faculties}">
         <section class="faculties container">
             <h1>
                 Faculty list
             </h1>
-            <form class="form">
+            <form action="./admin" class=form" method="POST">
                 <input type="hidden" name="action" value="toFacultyForm">
                 <button type="submit">Add</button>
             </form>
@@ -69,7 +78,7 @@
                     <c:set var="action" value="addFaculty"/>
                 </c:if>
 
-                <form class="add-form">
+                <form action="./admin" class="add-form" method="POST">
                     <input type="hidden" name="id" value="${faculty.getId()}">
                     <label>Name: <input type="text" name="name" value="${faculty.getName()}"></label>
                     <label>Description: <input type="text" name="description" value="${faculty.getDescription()}"></label>
@@ -95,14 +104,41 @@
                         <p>
                             Budget: <c:out value="${faculty.getBudgetPlace()}"/>
                         </p>
-                        <form>
+                        <form action="./admin" method="post">
                             <input type="hidden" value="${faculty.getId()}" name="id">
                             <button type="submit" class="delete" name="action" value="deleteFaculty">Delete</button>
                         </form>
-                        <form>
+                        <form action="./admin" method="POST">
                             <input type="hidden" value="${faculty.getId()}" name="id">
                             <button type="submit" name="action" value="toEditFaculty">Edit</button>
                         </form>
+                    </li>
+                </c:forEach>
+            </ul>
+        </section>
+    </c:if>
+    <c:if test="${!empty requestScope.users}">
+        <section class="faculties container">
+            <ul class="faculties-list list">
+                <c:forEach  var="user" items="${requestScope.users}">
+                    <li>
+                        <h2 class="name">
+                            <c:out value="${user.getName()}"/>
+                        </h2>
+                        <c:if test="${user.isBlocked()}">
+                            <form action="./admin" method="post">
+                                <input type="hidden" value="${user.getId()}" name="id">
+                                <input type="hidden" name="action" value="unblockUser">
+                                <button type="submit">Unblock</button>
+                            </form>
+                        </c:if>
+                        <c:if test="${!user.isBlocked()}">
+                            <form action="./admin" method="post">
+                                <input type="hidden" value="${user.getId()}" name="id">
+                                <input type="hidden" name="action" value="blockUser">
+                                <button type="submit" class="delete">Block</button>
+                            </form>
+                        </c:if>
                     </li>
                 </c:forEach>
             </ul>
@@ -120,12 +156,12 @@
                             <h2 class="name">
                                 ${statement.getName()}
                             </h2>
-                            <form>
+                            <form action="./admin" method="post">
                                 <input type="hidden" name="id" value="${statement.getId()}">
                                 <button type="submit" name="action" value="toFacultyStatements">Show Entrant</button>
                             </form>
                         </div>
-                        <form action="." class="discipline-chooser">
+                        <form action="./admin" class="discipline-chooser" method="POST">
                             <input type="hidden" name="id" value="${statement.getId()}">
                             <div class="check-box-container">
                                 <c:forEach var="discipline" items="${requestScope.disciplines}">
@@ -144,7 +180,7 @@
                                         <li class="e-box">
                                             <div class="e-preview">
                                                 <h3>${entrant.getUser().getName()}</h3>
-                                                <form>
+                                                <form action="./admin" method="POST">
                                                     <input type="hidden" name="id" value="${statement.getId()}">
                                                     <input type="hidden" name="target" value="${entrant.getId()}">
                                                     <button type="submit" name="action" value="showUserData">+</button>
@@ -170,19 +206,6 @@
                     </li>
                 </c:forEach>
             </ul>
-        </section>
-    </c:if>
-    <c:if test="${!empty requestScope.user}">
-        <section class="account container">
-            <h1>Admin data</h1>
-            <form class="account-form login-form">
-                <input type="hidden" name="action" value="changeAccountData">
-                <label>Login: <input name="login" value="vlad"></label>
-                <label>Login: <input name="login" value="vlad"></label>
-                <label>Login: <input name="login" value="vlad"></label>
-                <label>Login: <input name="login" value="vlad"></label>
-                <button type="submit">Apply</button>
-            </form>
         </section>
     </c:if>
 </main>

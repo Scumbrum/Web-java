@@ -1,15 +1,14 @@
 package API;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class RequestParserService {
 
     public ArrayList<Long> longArrayParse(Map<String, String[]> params, String param)  {
-
+        if(params.get(param) == null) {
+            throw new IllegalArgumentException("Empty entrant list");
+        }
         return (ArrayList<Long>) Arrays.stream(params.get(param))
                 .map(Long::parseLong)
                 .collect(Collectors.toList());

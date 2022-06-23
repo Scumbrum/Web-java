@@ -1,6 +1,6 @@
 package API;
 
-import connection.DAO.DAOException;
+import connection.DAO.*;
 import connection.entities.*;
 
 import java.util.ArrayList;
@@ -9,6 +9,17 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ClientService extends UserService{
+    public ClientService(StatementDAO statementDAO, DisciplineDAO disciplineDAO, ScoreDAO scoreDAO, UserDAO userDAO) {
+        this.statementDAO = statementDAO;
+        this.disciplineDAO = disciplineDAO;
+        this.scoreDAO = scoreDAO;
+        this.userDAO = userDAO;
+    }
+
+    public ClientService() {
+        super();
+    }
+
     public ArrayList<Discipline> getAdditionDisciplines(ArrayList<Discipline> disciplines) throws APIException {
         ArrayList<Discipline> addition;
         try {
@@ -20,7 +31,6 @@ public class ClientService extends UserService{
                                     .anyMatch(discipline1 -> Objects.equals(discipline1.getId(), discipline.getId()))
                     )
                     .collect(Collectors.toList());
-            logger.info("Rest disciplines" + addition);
         } catch (DAOException e) {
             throw new APIException("Can't get addition disciplines",e);
         }
@@ -33,7 +43,6 @@ public class ClientService extends UserService{
            for (Long exist: exists) {
                disciplines.add(disciplineDAO.getById(exist).get());
            }
-            logger.info("Current disciplines" + disciplines);
         } catch (DAOException e) {
             throw new APIException("Can't get disciplines",e);
         }
@@ -47,7 +56,6 @@ public class ClientService extends UserService{
                    .stream()
                    .limit(amount)
                    .collect(Collectors.toList());
-           logger.info("Get " + amount + " disciplines");
         } catch (DAOException e) {
             throw new APIException("Can't get disciplines",e);
         }
@@ -58,6 +66,9 @@ public class ClientService extends UserService{
         validateMarks(marks);
         try {
             User user = userDAO.getByLogin(login).get();
+            if(checkExistsStatement(user, faculty)){
+                throw new APIException("Exists Statement");
+            }
             statementDAO.add(new Statement(user, faculty));
             Statement statement = statementDAO.getByData(user, faculty).get();
             for(Long id: marks.keySet()) {
@@ -66,11 +77,14 @@ public class ClientService extends UserService{
                 Score score = new Score(discipline, statement, marks.get(id));
                 scoreDAO.add(score);
             }
-            logger.info("Add statement " +statement);
         } catch (DAOException e) {
             e.printStackTrace();
             throw new APIException("Can't create statement", e);
         }
+    }
+
+    private boolean checkExistsStatement(User user, Faculty faculty) throws DAOException {
+        return statementDAO.getByData(user, faculty).isPresent();
     }
 
     private void validateMarks(HashMap<Long, Short> marks) {
@@ -89,8 +103,7 @@ public class ClientService extends UserService{
         try {
             User user = userDAO.getByLogin(login).get();
             statements = (ArrayList<Statement>) statementDAO.getByUser(user);
-            logger.info("Get statements " + user);
-        }catch (DAOException e) {
+        } catch (DAOException e) {
             throw new APIException("Can't create statement");
         }
 

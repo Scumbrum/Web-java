@@ -17,6 +17,9 @@ public class ScoreDAO extends Util<Score> {
     public ScoreDAO() {
         super();
     }
+    public ScoreDAO(Connection connection) {
+        super(connection);
+    }
 
     @Override
     public Optional<Score> getById(Long id) throws DAOException {
@@ -39,9 +42,10 @@ public class ScoreDAO extends Util<Score> {
             reader.lock();
 
             try(ResultSet result = statement.executeQuery();) {
+                result.next();
                 score.setId(result.getLong(1));
                 score.setStatement(createStatement(result, 5));
-                score.setDiscipline(createDiscipline(result, 24));
+                score.setDiscipline(createDiscipline(result, 25));
                 score.setMark(result.getShort(4));
             }
 
@@ -63,11 +67,11 @@ public class ScoreDAO extends Util<Score> {
         return new Statement(
                 resultSet.getLong(begin),
                 createUser(resultSet, begin + 5),
-                createFaculty(resultSet, begin + 14)
+                createFaculty(resultSet, begin + 15)
         );
     }
 
-    private User createUser(ResultSet result, Integer begin) throws IOException, SQLException {
+    private User createUser(ResultSet result, Integer begin) throws SQLException {
         return new User(
                 result.getLong(begin++),
                 result.getString(begin++),
@@ -77,7 +81,8 @@ public class ScoreDAO extends Util<Score> {
                 result.getString(begin++),
                 result.getString(begin++),
                 result.getString(begin++),
-                result.getString(begin)
+                result.getString(begin++),
+                result.getBoolean(begin)
         );
     }
 
@@ -114,7 +119,7 @@ public class ScoreDAO extends Util<Score> {
                     Score score = new Score();
                     score.setId(result.getLong(1));
                     score.setStatement(createStatement(result, 5));
-                    score.setDiscipline(createDiscipline(result, 24));
+                    score.setDiscipline(createDiscipline(result, 25));
                     score.setMark(result.getShort(4));
                     scores.add(score);
                 }
@@ -153,13 +158,14 @@ public class ScoreDAO extends Util<Score> {
                     Score score = new Score();
                     score.setId(result.getLong(1));
                     score.setStatement(createStatement(result, 5));
-                    score.setDiscipline(createDiscipline(result, 24));
+                    score.setDiscipline(createDiscipline(result, 25));
                     score.setMark(result.getShort(4));
                     scores.add(score);
                 }
             }
 
         } catch (SQLException | IOException throwables) {
+            System.out.println(throwables.getMessage());
             throw new DAOException("Can't get score", throwables);
         } finally {
             reader.unlock();

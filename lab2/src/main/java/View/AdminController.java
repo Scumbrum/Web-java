@@ -1,9 +1,6 @@
 package View;
 
-import API.APIException;
-import API.AdminService;
-import API.RequestParserService;
-import API.UserService;
+import API.*;
 import Config.Pages;
 import Config.Params;
 import Config.Actions;
@@ -35,42 +32,29 @@ public class AdminController extends ServletLogined {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        logger.info("Admin GET");
-        doPost(request, response);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.doPost(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         logger.info("Admin POST");
-        checkLogin(response, (String) request.getSession().getAttribute(Params.LOGIN_FIELD), Pages.LOGIN_CONTROLLER);
         String action = request.getParameter(Params.ACTION_FIELD);
         Faculty faculty;
-        ArrayList<Faculty> faculties;
+        ArrayList<User> users;
+        ArrayList<Faculty> faculties = null;
         Long id;
-        ArrayList<Discipline> disciplines;
         ArrayList<Statement> statements;
-        AdminService adminService = new AdminService();
+        ArrayList<Discipline> disciplines;
         RequestParserService parserService = new RequestParserService();
         logger.info("Admin:" + action);
+        if(action == null) {
+            action = "";
+        }
+        AdminService adminService;
         try {
+            adminService = new LoggedAdminService();
             switch (action) {
-                case Actions.GO_TO_FACULTY_FORM:
-                    request.setAttribute(Params.ADD_MARKER, true);
-                    request.setAttribute(Params.TARGET_FACULTY, new Faculty());
-                    toFacultyList(adminService, request, response);
-                    return;
-                case Actions.GO_TO_EDIT_FACULTY:
-                    request.setAttribute(Params.ADD_MARKER, true);
-                    id = Long.parseLong(request.getParameter(Params.ID_FIELD));
-                    request.setAttribute(Params.TARGET_FACULTY, adminService.getFaculty(id));
-                    request.setAttribute(Params.FACULTY_FIELD, adminService.getFacultiesWithout(id));
-                    request.getRequestDispatcher(Pages.ADMIN_PAGE).forward(request, response);
-                    return;
-                case Actions.DELETE_FACULTY:
-                    adminService.deleteFaculty(Long.parseLong(request.getParameter(Params.ID_FIELD)));
-                    toFacultyList(adminService, request, response);
-                    return;
                 case Actions.EDIT_FACULTY:
                     faculty = new Faculty(Long.parseLong(request.getParameter(Params.ID_FIELD)),
                             request.getParameter(Params.NAME_FIELD),
@@ -94,6 +78,54 @@ public class AdminController extends ServletLogined {
                         request.setAttribute(Params.ERROR_FIELD, e.getMessage());
                     }
                     toFacultyList(adminService, request, response);
+                    return;
+                case Actions.DO_FINALISE:
+                    id = Long.parseLong(request.getParameter(Params.ID_FIELD));
+                    ArrayList<Long> chosen;
+                    try {
+                        chosen = parserService.longArrayParse(request.getParameterMap(), Params.DISCIPLINE_FIELD);
+                        adminService.finalise(chosen, id);
+                    } catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        request.setAttribute(Params.ERROR_FIELD, e.getMessage());
+                        return;
+                    } finally {
+                        faculties = adminService.getFaculties();
+                        request.setAttribute(Params.STATEMENTS_FIELD, faculties);
+                        disciplines = adminService.getDisciplines();
+                        request.setAttribute(Params.DISCIPLINES_FIELD, disciplines);
+                        request.getRequestDispatcher(Pages.ADMIN_PAGE).forward(request, response);
+                    }
+                    return;
+                case Actions.DELETE_FACULTY:
+                    adminService.deleteFaculty(Long.parseLong(request.getParameter(Params.ID_FIELD)));
+                    toFacultyList(adminService, request, response);
+                    return;
+                case Actions.DO_DELETE_USER:
+                    faculties = adminService.getFaculties();
+                    id = Long.parseLong(request.getParameter(Params.ID_FIELD));
+                    faculty = adminService.getFaculty(id);
+                    request.setAttribute(Params.CURR_FIELD, id);
+                    id = Long.parseLong(request.getParameter(Params.TARGET_FIELD));
+                    adminService.rejectStatement(id);
+                    statements = adminService.getStatementOf(faculty);
+                    disciplines = adminService.getDisciplines();
+                    request.setAttribute(Params.DISCIPLINES_FIELD, disciplines);
+                    request.setAttribute(Params.STATEMENTS_FIELD, faculties);
+                    request.setAttribute(Params.ENTRANTS_FIELD, statements);
+                    request.getRequestDispatcher(Pages.ADMIN_PAGE).forward(request, response);
+                    return;
+                case Actions.GO_TO_FACULTY_FORM:
+                    request.setAttribute(Params.ADD_MARKER, true);
+                    request.setAttribute(Params.TARGET_FACULTY, new Faculty());
+                    toFacultyList(adminService, request, response);
+                    return;
+                case Actions.GO_TO_EDIT_FACULTY:
+                    request.setAttribute(Params.ADD_MARKER, true);
+                    id = Long.parseLong(request.getParameter(Params.ID_FIELD));
+                    request.setAttribute(Params.TARGET_FACULTY, adminService.getFaculty(id));
+                    request.setAttribute(Params.FACULTY_FIELD, adminService.getFacultiesWithout(id));
+                    request.getRequestDispatcher(Pages.ADMIN_PAGE).forward(request, response);
                     return;
                 case Actions.GO_TO_STATEMENT:
                     faculties = adminService.getFaculties();
@@ -130,24 +162,23 @@ public class AdminController extends ServletLogined {
                     request.setAttribute(Params.SCORES_FIELD, scores);
                     request.getRequestDispatcher(Pages.ADMIN_PAGE).forward(request, response);
                     return;
-                case Actions.DO_DELETE_USER:
-                    faculties = adminService.getFaculties();
-                    id = Long.parseLong(request.getParameter(Params.ID_FIELD));
-                    faculty = adminService.getFaculty(id);
-                    request.setAttribute(Params.CURR_FIELD, id);
-                    id = Long.parseLong(request.getParameter(Params.TARGET_FIELD));
-                    adminService.rejectStatement(id);
-                    statements = adminService.getStatementOf(faculty);
-                    disciplines = adminService.getDisciplines();
-                    request.setAttribute(Params.DISCIPLINES_FIELD, disciplines);
-                    request.setAttribute(Params.STATEMENTS_FIELD, faculties);
-                    request.setAttribute(Params.ENTRANTS_FIELD, statements);
+                case Actions.GO_TO_USERS:
+                    users = adminService.getUsers();
+                    request.setAttribute(Params.USERS_FIELD, users);
                     request.getRequestDispatcher(Pages.ADMIN_PAGE).forward(request, response);
                     return;
-                case Actions.DO_FINALISE:
-                    id = Long.parseLong(request.getParameter(Params.ID_FIELD));
-                    ArrayList<Long> chosen = parserService.longArrayParse(request.getParameterMap(), Params.DISCIPLINE_FIELD);
-                    adminService.finalise(chosen, id);
+                case Actions.BLOCK_USER:
+                    adminService.blockUser(Long.parseLong(request.getParameter(Params.ID_FIELD)));
+                    users = adminService.getUsers();
+                    request.setAttribute(Params.USERS_FIELD, users);
+                    request.getRequestDispatcher(Pages.ADMIN_PAGE).forward(request, response);
+                    return;
+                case Actions.UNBLOCK_USER:
+                    adminService.unblockUser(Long.parseLong(request.getParameter(Params.ID_FIELD)));
+                    users = adminService.getUsers();
+                    request.setAttribute(Params.USERS_FIELD, users);
+                    request.getRequestDispatcher(Pages.ADMIN_PAGE).forward(request, response);
+                    return;
                 case Actions.SHOW_FACULTIES:
                 default:
                     toFacultyList(adminService, request, response);
@@ -155,9 +186,13 @@ public class AdminController extends ServletLogined {
             }
         } catch (APIException e) {
             logger.severe(Arrays.toString(e.getStackTrace()));
+            request.setAttribute(Params.ERROR_FIELD, e.getMessage());
+            request.getRequestDispatcher(Pages.ADMIN_PAGE).forward(request,response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.severe(Arrays.toString(e.getStackTrace()));
             response.sendError(505);
         }
-
     }
 
     private void toFacultyList(UserService service, HttpServletRequest request, HttpServletResponse response) throws APIException, ServletException, IOException {

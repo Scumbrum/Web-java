@@ -1,0 +1,472 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+}
+
+h2, h1 {
+    color: gray;
+}
+
+button {
+    cursor: pointer;
+}
+
+label, p, span {
+    color: floralwhite;
+    font-size: 18px;
+}
+
+input {
+    font-size: 18px;
+    background: transparent;
+    border: 3px solid gray;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+input:focus {
+    outline: none;
+}
+
+h1 {
+    font-size: 28px;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    padding-top: 100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.title {
+    width: fit-content;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 50%;
+}
+.login-form label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: gray;
+}
+
+.login-form label  {
+    color: gray;
+}
+
+.login-form input {
+    margin-left: 15px;
+}
+
+.login-form label, .login-form button{
+    margin-top: 20px;
+}
+
+h2.error {
+    width: fit-content;
+    color: darkred;
+}
+
+.bottom-button {
+    margin-top: 70px;
+}
+
+header {
+    background: gray;
+}
+
+header .container {
+    padding-top: 0;
+}
+
+header nav {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
+
+header ul li {
+    margin-right: 20px;
+    padding: 15px 0;
+    cursor: pointer;
+}
+
+header ul li:last-child {
+    margin-right: 0;
+}
+
+.nav-item {
+    background: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: floralwhite;
+}
+
+.logout {
+    padding: 10px;
+    background: dodgerblue;
+    color: white;
+    border-radius: 10px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.faculties-list {
+    list-style: none;
+    width: 100%;
+}
+
+.list li {
+    background: gray;
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px 20px;
+    margin-top: 30px;
+    height: fit-content;
+}
+
+.list li h2 {
+    color: floralwhite;
+    text-shadow: 0 0 10px black;
+    letter-spacing: .1rem;
+    font-size: 28px;
+}
+
+.list li p {
+    color: floralwhite;
+    font-size: 18px;
+}
+
+button {
+    padding: 10px;
+    background: dodgerblue;
+    color: white;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+.statement-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3vw;
+    width: 100%;
+}
+
+.statement-list li p {
+    letter-spacing: .1rem;
+    font-size: 18px;
+}
+
+.statement-list li .error {
+    color: darkred;
+}
+
+.statement-list li .success {
+    color: lawngreen;
+}
+
+.statement-list li .info {
+    color: cyan;
+}
+
+
+.faculty-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40%
+}
+
+.faculty-form label {
+    display: flex;
+    justify-content: space-between;
+    text-transform: capitalize;
+    color: gray;
+    align-items: center;
+    font-size: 24px;
+    width: 100%;
+}
+
+.faculty-form.registration{
+    width: unset;
+}
+
+.faculty-form label, .faculty-form button {
+    margin-top: 20px;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.faculty-form button {
+    padding: 10px;
+    background: dodgerblue;
+    color: white;
+    border-radius: 10px;
+    font-size: 18px;
+    width: fit-content;
+}
+
+
+.faculty-form input {
+    border: 2px solid black;
+    border-radius: 10px;
+    font-size: 24px;
+    width: fit-content;
+    margin-left: 15px;
+}
+
+.disciplines {
+    margin-right: 20px;
+    border-radius: 10px;
+    font-size: 18px;
+    background: dodgerblue;
+    color: floralwhite;
+    padding: 5px 15px;
+}
+
+.add-btn {
+    border-radius: 10px;
+    padding: 15px;
+    color: floralwhite;
+    background: dodgerblue;
+}
+
+.top-form {
+    margin-bottom: 25px;
+    margin-top: 30px;
+}
+
+.account-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 4vw;
+    max-width: unset;
+}
+
+.account-form input {
+    border: 2px solid black;
+    border-radius: 10px;
+    font-size: 24px;
+    width: 150px;
+    padding: 0 10px;
+}
+
+.account-form label {
+    font-size: 24px;
+}
+
+.account-form button {
+    grid-column:  1/3;
+    margin: 20px auto 0;
+    padding: 10px 30px;
+    background: dodgerblue;
+    color: floralwhite;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+.sorted-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 230px;
+
+}
+
+.sorted-form select {
+    padding: 5px 5px;
+    font-size: 14px;
+    color: floralwhite;
+    background: dodgerblue;
+    border-radius: 15px;
+}
+
+.sorted-form label {
+    grid-column: 1/3;
+    display:flex;
+    justify-content:space-between;
+    font-size: 18px;
+    color:gray;
+    align-items:center;
+    margin:10px 0;
+}
+
+.sorted-form button {
+
+    background:dodgerblue;
+    color:floralwhite;
+    border-radius:15px;
+    padding: 10px;
+    grid-column: 1/3;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.admin {
+    color: darkred;
+}
+
+
+.form  button{
+    background:dodgerblue;
+    color:floralwhite;
+    border-radius:15px;
+    padding: 10px 20px;
+    width: 100%;
+    font-size: 20px;
+    margin: 20px 0;
+}
+
+.add-form {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    background: gray;
+    border-radius: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: center;
+    padding: 30px 20px;
+}
+
+.add-form button {
+    grid-column: 1/3;
+    padding-right: 40px;
+    padding-left: 40px;
+    width: fit-content;
+    margin: 30px auto 0;
+}
+
+.add-form .delete {
+    grid-column: 3/5;
+}
+
+.add-form input {
+    width: 150px;
+    border-color: floralwhite;
+    color: floralwhite;
+}
+
+.statement-list li {
+    display: block;
+}
+
+.view li {
+    display: flex;
+}
+
+.statement-list .statement-data {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+
+.e-list {
+    width: 100%;
+    border: 3px solid floralwhite;
+    border-radius: 20px;
+    max-height: 400px;
+    overflow: auto;
+}
+
+.statement-list .e-box {
+    margin: 15px 0;
+    padding: 5px 10px;
+}
+
+.e-box li {
+    margin: 15px 0 0;
+    padding: 5px 10px;
+    color: cyan;
+    font-size: 18px;
+}
+
+.e-box ul {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.e-preview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.expander {
+    color: floralwhite;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.e-box h3 {
+    color: floralwhite;
+    max-width: 85%;
+}
+
+.discipline {
+    margin-right: 10px;
+}
+
+form .delete {
+    background: darkred;
+}
+
+.check-box-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 20px;
+}
+
+.check-box-container label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.check-box-container input {
+    margin-left: 10px;
+}
+
+.discipline-chooser {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.discipline-chooser button {
+    margin: 20px 0;
+}
+
+.error.center {
+    width: 100%;
+    text-align: center;
+    margin-top: 25px;
+}

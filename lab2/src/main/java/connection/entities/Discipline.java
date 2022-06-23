@@ -40,7 +40,7 @@ public class Discipline {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Discipline that = (Discipline) o;
-        return id.equals(that.id) && name.equals(that.name);
+        return id.equals(that.id);
     }
 
     @Override

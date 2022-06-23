@@ -1,10 +1,24 @@
 package API;
 
+import connection.Config;
 import connection.DAO.DAOException;
 import connection.DAO.UserDAO;
 import connection.entities.User;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import java.io.IOException;
+import java.net.InterfaceAddress;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.FileHandler;
@@ -13,19 +27,14 @@ import java.util.stream.Stream;
 
 public class AuthService {
 
-    private Logger logger = Logger.getLogger("MyLog");
-
     private UserDAO userDAO;
+
+    public AuthService(UserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
 
     public AuthService() {
         userDAO = new UserDAO();
-        FileHandler fh = null;
-        try {
-            fh = new FileHandler("D:/logs/logs.log");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        logger.addHandler(fh);
     }
     public Boolean tryLoginUser(String login, String password) throws APIException {
 
@@ -33,33 +42,32 @@ public class AuthService {
             List<User> users = userDAO.getAll();
 
             Optional<User> exist = users.stream()
-                    .filter(user -> user.getMail().equals(login) && user.getPassword().equals(password))
+                    .filter(user -> user.getMail().equals(login) && !user.isBlocked())
                     .findFirst();
 
-
             if(exist.isPresent()) {
-                logger.info("Success login" + exist.get());
-                return true;
+                User user = exist.get();
+                String actualPassword = passwordTransform(user.getPassword(),Cipher.DECRYPT_MODE);
+                return actualPassword.equals(password);
             }
 
-        } catch (DAOException e) {
+        } catch (DAOException
+                 |APIException e) {
             throw new APIException(e.getMessage(), e);
         }
-
-        logger.info("Failed login");
 
         return false;
     }
 
     public Boolean tryRegUser(User user, String password) throws APIException {
 
-        if(!user.getPassword().equals(password)){
-            logger.info("Failed registration");
+        if(user.getPassword() == null || !user.getPassword().equals(password)){
             return false;
         }
 
-        if(!user.getMail().contains("@")) {
-            logger.info("Failed registration");
+        try {
+            new InternetAddress(user.getMail());
+        } catch (AddressException e) {
             return false;
         }
 
@@ -72,12 +80,14 @@ public class AuthService {
                     .findFirst();
 
             if(exists.isPresent()) {
-                logger.info("Failed registration");
                 return false;
             }
+
+            String encodedPassword = passwordTransform(user.getPassword(),Cipher.ENCRYPT_MODE);
+            user.setPassword(encodedPassword);
             userDAO.add(user);
-            logger.info("Failed registration" + user);
-        } catch (DAOException e) {
+        } catch (DAOException
+                 |APIException e) {
             throw new APIException(e.getMessage(), e);
         }
 
@@ -85,12 +95,29 @@ public class AuthService {
     }
 
     public Boolean checkLogin(String login) {
-
        if(login != null) {
-           logger.info("Success authorise" + login);
            return true;
        }
-        logger.info("Failed authorise");
        return false;
+    }
+
+    private String passwordTransform(String password, int type) throws APIException {
+        Key key = new SecretKeySpec(Config.KEY, Config.ALGORITHM);
+        try {
+            Cipher cipher = Cipher.getInstance(Config.ALGORITHM);
+            cipher.init(type, key);
+            if(type == Cipher.DECRYPT_MODE) {
+                return new String(cipher.doFinal(Base64.getDecoder()
+                        .decode(password)));
+            }
+            return Base64.getEncoder()
+                    .encodeToString(cipher.doFinal(password.getBytes()));
+        } catch (NoSuchPaddingException
+                 |NoSuchAlgorithmException
+                 |InvalidKeyException
+                 |IllegalBlockSizeException
+                 |BadPaddingException e) {
+            throw new APIException(e.getMessage(), e);
+        }
     }
 }

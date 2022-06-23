@@ -15,14 +15,29 @@ public class Statement {
         this.faculty = faculty;
     }
 
+    public Statement() {
+
+    }
+
+    public Statement(User user, Faculty faculty, Short average, Short status) {
+        this.user = user;
+        this.faculty = faculty;
+        this.average = average;
+        this.status = status;
+    }
+
+    public Statement(Long id, User user, Faculty faculty, Short average, Short status) {
+        this.id = id;
+        this.user = user;
+        this.faculty = faculty;
+        this.average = average;
+        this.status = status;
+    }
+
     public Statement(Long id, User user, Faculty faculty) {
         this.id = id;
         this.user = user;
         this.faculty = faculty;
-    }
-
-    public Statement() {
-
     }
 
     public Short getStatus() {
@@ -70,7 +85,10 @@ public class Statement {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Statement statement = (Statement) o;
-        return id.equals(statement.id) && user.equals(statement.user) && faculty.equals(statement.faculty);
+        if(id!=null) {
+            return  id.equals(statement.getId());
+        }
+        return user.equals(statement.user) && faculty.equals(statement.faculty);
     }
 
     @Override

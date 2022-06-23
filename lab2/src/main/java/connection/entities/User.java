@@ -13,8 +13,9 @@ public class User {
     private String city;
     private String education;
     private String password;
+    private boolean blocked;
 
-    public User(Long id, String name, String surname, String patronimic, String password, String mail, String region, String city, String education) {
+    public User(Long id, String name, String surname, String patronimic, String password, String mail, String region, String city, String education, Boolean blocked) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -24,6 +25,7 @@ public class User {
         this.region = region;
         this.city = city;
         this.education = education;
+        this.blocked = blocked;
     }
 
     public User(String name, String surname, String patronimic, String mail, String region, String city, String education, String password) {
@@ -45,7 +47,7 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id.equals(user.id) && name.equals(user.name) && surname.equals(user.surname) && patronimic.equals(user.patronimic) && mail.equals(user.mail) && region.equals(user.region) && city.equals(user.city) && education.equals(user.education);
+        return id.equals(user.id)||mail.equals(user.mail);
     }
 
     @Override
@@ -60,6 +62,14 @@ public class User {
                 ", surname='" + surname + '\'' +
                 ", patronimic='" + patronimic + '\'' +
                 '}';
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 
     public String getPassword() {

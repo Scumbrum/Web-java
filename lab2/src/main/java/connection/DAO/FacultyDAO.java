@@ -17,6 +17,10 @@ public class FacultyDAO extends Util<Faculty> {
         super();
     }
 
+    public FacultyDAO(Connection connection) {
+        super(connection);
+    }
+
     @Override
     public Optional<Faculty> getById(Long id) throws DAOException {
 
@@ -44,6 +48,7 @@ public class FacultyDAO extends Util<Faculty> {
             }
 
         } catch (SQLException throwables) {
+            throwables.printStackTrace();
             throw new DAOException("Can't get faculty", throwables);
         } finally {
             reader.unlock();

@@ -29,6 +29,7 @@ public class Params {
     public static final String ENTRANTS_FIELD = "entrants";
     public static final String TARGET_FIELD = "target";
     public static final String SCORES_FIELD = "scores";
+    public static final String USERS_FIELD = "users";
 
     private Params (){};
 }
